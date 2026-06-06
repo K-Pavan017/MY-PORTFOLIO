@@ -18,7 +18,6 @@ export const profile = {
     "AI Engineer",
     "Machine Learning Engineer",
     "Full Stack Developer",
-    "Backend Developer",
     "Java Developer",
   ],
   summary:

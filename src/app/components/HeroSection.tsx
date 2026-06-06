@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, Download } from "lucide-react";
+import { ChevronDown, Download, ArrowUpRight } from "lucide-react";
 import { FaGithub, FaLinkedin, FaYoutube } from "react-icons/fa";
 import { profile } from "@/lib/data";
 import dynamic from "next/dynamic";
@@ -12,36 +11,10 @@ const ParticleBackground = dynamic(
   { ssr: false }
 );
 
-function useTypingEffect(words: string[], typingSpeed = 80, deletingSpeed = 40, pauseTime = 2000) {
-  const [displayText, setDisplayText] = useState("");
-  const [wordIndex, setWordIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const tick = useCallback(() => {
-    const currentWord = words[wordIndex];
-    if (!isDeleting) {
-      setDisplayText(currentWord.substring(0, displayText.length + 1));
-      if (displayText.length + 1 === currentWord.length) {
-        setTimeout(() => setIsDeleting(true), pauseTime);
-        return;
-      }
-    } else {
-      setDisplayText(currentWord.substring(0, displayText.length - 1));
-      if (displayText.length === 0) {
-        setIsDeleting(false);
-        setWordIndex((prev) => (prev + 1) % words.length);
-        return;
-      }
-    }
-  }, [displayText, isDeleting, wordIndex, words, pauseTime]);
-
-  useEffect(() => {
-    const timeout = setTimeout(tick, isDeleting ? deletingSpeed : typingSpeed);
-    return () => clearTimeout(timeout);
-  }, [tick, isDeleting, deletingSpeed, typingSpeed]);
-
-  return displayText;
-}
+const ComputersCanvas = dynamic(
+  () => import("./ComputersCanvas"),
+  { ssr: false }
+);
 
 const socialLinks = [
   { icon: FaGithub, href: profile.github, label: "GitHub" },
@@ -52,112 +25,128 @@ const socialLinks = [
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.15 },
+    transition: { staggerChildren: 0.1 },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const } },
 };
 
 export default function HeroSection() {
-  const typedRole = useTypingEffect(profile.roles, 80, 40, 2200);
-
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex flex-col justify-between overflow-hidden pt-28 pb-12"
     >
       <ParticleBackground />
+
+      {/* Structural background grid lines */}
+      <div className="absolute inset-0 grid grid-cols-4 pointer-events-none opacity-15 z-0">
+        <div className="border-r border-white/5 h-full w-full" />
+        <div className="border-r border-white/5 h-full w-full" />
+        <div className="border-r border-white/5 h-full w-full" />
+        <div className="h-full w-full" />
+      </div>
 
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 max-w-4xl mx-auto px-6 text-center"
+        className="relative z-10 max-w-6xl mx-auto px-6 w-full flex-grow flex flex-col justify-center"
       >
-        <motion.p
-          variants={itemVariants}
-          className="text-accent-cyan font-mono text-sm md:text-base tracking-widest uppercase mb-4"
-        >
-          Hello, I&apos;m
-        </motion.p>
+        <div className="grid lg:grid-cols-12 gap-6 items-start">
+          {/* Left Side: Tall Vertical Track Dot Line Indicator and Headline Text */}
+          <div className="lg:col-span-8 flex gap-5 items-start">
+            
+            {/* The Blinking Track Indicator Column */}
+            <div className="flex flex-col justify-center items-center mt-5">
+              <div className="w-5 h-5 rounded-full bg-accent-violet shadow-[0_0_15px_rgba(124,58,237,0.8)]" />
+              <div className="w-1 sm:h-80 h-48 bg-gradient-to-b from-accent-violet to-transparent opacity-60" />
+            </div>
 
-        <motion.h1
-          variants={itemVariants}
-          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6"
-        >
-          <span className="gradient-text animate-gradient">{profile.name}</span>
-        </motion.h1>
+            {/* Typography content */}
+            <div className="space-y-6">
+              <motion.div variants={itemVariants} className="space-y-2">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground">
+                  Hi, I&apos;m <span className="gradient-text animate-gradient">{profile.name}</span>
+                </h1>
+                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-foreground/80 font-sans font-light max-w-2xl leading-relaxed">
+                  I build intelligent AI agents, forecasting models, scalable backend systems, and responsive full-stack solutions.
+                </p>
+              </motion.div>
 
+              {/* Tagline block */}
+              <motion.p
+                variants={itemVariants}
+                className="text-xs uppercase tracking-widest font-mono text-accent-cyan"
+              >
+                &ldquo;Code is poetry. AI is the canvas.&rdquo;
+              </motion.p>
+
+              {/* Action and social bar */}
+              <motion.div
+                variants={itemVariants}
+                className="flex flex-wrap items-center gap-4 pt-2"
+              >
+                <button
+                  onClick={() => document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" })}
+                  className="px-6 py-3 rounded-full bg-gradient-to-r from-accent-cyan to-accent-violet text-background font-semibold text-xs uppercase tracking-wider transition-transform hover:scale-[1.02] flex items-center gap-2 cursor-pointer shadow-lg shadow-accent-violet/25"
+                >
+                  View My Work
+                  <ArrowUpRight size={14} />
+                </button>
+                <a
+                  href="/resume.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-full border border-border text-foreground font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all hover:border-accent-cyan/40 hover:bg-accent-cyan/5"
+                >
+                  <Download size={14} />
+                  Resume
+                </a>
+                <div className="flex gap-2 pl-2 border-l border-white/10 ml-2">
+                  {socialLinks.map((s) => (
+                    <a
+                      key={s.label}
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-full border border-transparent text-muted hover:text-accent-cyan hover:border-accent-cyan/20 transition-all"
+                      title={s.label}
+                    >
+                      <s.icon size={16} />
+                    </a>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        {/* 3D Workstation viewport at the bottom/center */}
         <motion.div
           variants={itemVariants}
-          className="h-10 md:h-12 flex items-center justify-center mb-8"
+          className="w-full mt-4 lg:-mt-8 flex justify-center z-10"
         >
-          <span className="text-xl md:text-2xl lg:text-3xl font-medium text-foreground/80">
-            {typedRole}
-          </span>
-          <span className="ml-0.5 w-0.5 h-7 md:h-8 bg-accent-cyan animate-blink" />
-        </motion.div>
-
-        <motion.p
-          variants={itemVariants}
-          className="max-w-2xl mx-auto text-muted text-base md:text-lg leading-relaxed mb-10"
-        >
-          {profile.summary}
-        </motion.p>
-
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
-        >
-          <button
-            onClick={() => document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" })}
-            className="px-8 py-3.5 rounded-full bg-gradient-to-r from-accent-cyan to-accent-violet text-background font-semibold text-sm transition-transform hover:scale-105 hover:shadow-lg hover:shadow-accent-violet/20 cursor-pointer"
-          >
-            View Projects
-          </button>
-          <a
-            href="/resume.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-8 py-3.5 rounded-full border border-border text-foreground font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:border-accent-cyan/40 hover:bg-accent-cyan/5"
-          >
-            <Download size={16} />
-            Download Resume
-          </a>
-        </motion.div>
-
-        <motion.div
-          variants={itemVariants}
-          className="flex gap-4 justify-center"
-        >
-          {socialLinks.map((s) => (
-            <a
-              key={s.label}
-              href={s.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={s.label}
-              className="p-3 rounded-full border border-border text-muted transition-all hover:text-accent-cyan hover:border-accent-cyan/40 hover:bg-accent-cyan/5 hover:-translate-y-1"
-            >
-              <s.icon size={20} />
-            </a>
-          ))}
+          <ComputersCanvas />
         </motion.div>
       </motion.div>
 
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-        onClick={() => document.querySelector("#about")?.scrollIntoView({ behavior: "smooth" })}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-muted animate-float cursor-pointer"
-        aria-label="Scroll down"
-      >
-        <ChevronDown size={28} />
-      </motion.button>
+      {/* Down chevron */}
+      <div className="w-full flex justify-center">
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 1 }}
+          onClick={() => document.querySelector("#about")?.scrollIntoView({ behavior: "smooth" })}
+          className="text-muted animate-float cursor-pointer z-10"
+          aria-label="Scroll down"
+        >
+          <ChevronDown size={28} />
+        </motion.button>
+      </div>
     </section>
   );
 }
